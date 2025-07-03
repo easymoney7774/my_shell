@@ -1,0 +1,24 @@
+# 基本命令
+echo hello
+cd ..
+pwd
+
+# 重定向
+echo Hello > out.txt
+cat < out.txt
+
+# 管道
+ls -l | grep .c
+
+# 后台
+sleep 5 &
+
+# 历史与 !n
+history
+!2
+
+# 别名
+alias ll='ls -l'
+ll
+unalias ll
+alias
