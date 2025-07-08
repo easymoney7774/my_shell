@@ -49,7 +49,7 @@ int main() {
                 printf("无效的历史编号: !%d\n", index);
                 continue;
             }
-            printf("执行: %s\n", prev_cmd);
+            printf("excute: %s\n", prev_cmd);
             strncpy(cmdline, prev_cmd, MAX_CMD_LEN);
         }
 
@@ -57,9 +57,9 @@ int main() {
         if (strncmp(cmdline, "unalias ", 8) == 0) {
             const char* name = cmdline + 8;
             if (remove_alias(name)) {
-                printf("已取消别名: %s\n", name);
+                printf("delete successfully: %s\n", name);
             } else {
-                printf("未找到别名: %s\n", name);
+                printf("cant find: %s\n", name);
             }
             continue;
         }
