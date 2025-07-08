@@ -53,6 +53,17 @@ int main() {
             strncpy(cmdline, prev_cmd, MAX_CMD_LEN);
         }
 
+        // ===== 添加 unalias 命令支持 =====
+        if (strncmp(cmdline, "unalias ", 8) == 0) {
+            const char* name = cmdline + 8;
+            if (remove_alias(name)) {
+                printf("已取消别名: %s\n", name);
+            } else {
+                printf("未找到别名: %s\n", name);
+            }
+            continue;
+        }
+
         // ===== 管道命令检测 =====
         if (strchr(cmdline, '|')) {
             execute_piped_command(cmdline);
