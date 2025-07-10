@@ -50,3 +50,9 @@ int remove_alias(const char* name) {
     }
     return 0;
 }
+const char* get_alias_name(int index) {
+    extern int alias_count;
+    extern Alias alias_table[MAX_ALIASES];
+    if (index < 0 || index >= alias_count) return NULL;
+    return alias_table[index].name;
+}
