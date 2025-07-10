@@ -7,6 +7,7 @@ typedef struct {
     char name[64];
     char value[256];
 } Alias;  // ✅ 类型定义写在头文件中
+const char* get_alias_name(int index);
 
 void init_alias();
 void add_or_update_alias(const char* name, const char* value);
