@@ -3,18 +3,22 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <readline/readline.h>
+#include <readline/history.h>
+#include <dirent.h>
+#include <sys/stat.h>
+
 #include "builtin.h"
 #include "alias.h"
 #include "history.h"
 
 #define MAX_BUILTINS 10
 
-// 内建命令列表
+// ========== 内建命令列表 ==========
 static const char* builtin_cmds[] = {
     "cd", "exit", "alias", "history", NULL
 };
 
-// 判断是否是内建命令
+// ========== 判断是否为内建命令 ==========
 int is_builtin_command(const char* cmd) {
     for (int i = 0; builtin_cmds[i]; i++) {
         if (strncmp(cmd, builtin_cmds[i], strlen(builtin_cmds[i])) == 0) {
@@ -24,7 +28,7 @@ int is_builtin_command(const char* cmd) {
     return 0;
 }
 
-// 执行内建命令
+// ========== 执行内建命令 ==========
 int execute_builtin_command(char* cmdline) {
     char* args[64];
     int argc = 0;
@@ -72,12 +76,9 @@ int execute_builtin_command(char* cmdline) {
     return 0;
 }
 
-// =================== readline 补全支持 ===================
+// ========== readline 补全支持 ==========
 
-#include <dirent.h>
-#include <sys/stat.h>
-
-// 命令名补全
+// ---------- 命令名补全 ----------
 char* command_generator(const char* text, int state) {
     static int list_index;
     static int len;
@@ -93,13 +94,45 @@ char* command_generator(const char* text, int state) {
             return strdup(name);
         }
     }
-
     return NULL;
 }
 
-char** builtin_completion(const char* text, int start, int end) {
-    if (start == 0) {
-        return rl_completion_matches(text, command_generator);
+// ---------- 别名名补全 ----------
+char* alias_generator(const char* text, int state) {
+    static int index = 0;
+    static int len = 0;
+    if (!state) {
+        index = 0;
+        len = strlen(text);
+    }
+
+    const char* name;
+    while ((name = get_alias_name(index++))) {
+        if (strncmp(name, text, len) == 0) {
+            return strdup(name);
+        }
     }
     return NULL;
+}
+
+// ---------- 主补全入口 ----------
+char** builtin_completion(const char* text, int start, int end) {
+    rl_attempted_completion_over = 1;  // 禁用 readline 默认补全行为
+
+    if (start == 0) {
+        // 补全命令名
+        return rl_completion_matches(text, command_generator);
+    }
+
+    // 获取当前命令名（如 alias、cd 等）
+    char* buffer = rl_line_buffer;
+    char cmd[64] = {0};
+    sscanf(buffer, "%63s", cmd);
+
+    if (strcmp(cmd, "alias") == 0 || strcmp(cmd, "unalias") == 0) {
+        return rl_completion_matches(text, alias_generator);
+    }
+
+    // 其他命令使用路径补全
+    return rl_completion_matches(text, rl_filename_completion_function);
 }
